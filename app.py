@@ -71,8 +71,98 @@ def exit_():
     else:
         msg.showerror("Error","You did something wrong!")
 
-def statistics():
-    pass
+def mean():
+    global data,dataname
+    def solve():
+        x = data_box.get()
+        try:
+            result = stats.Mean(data[x])
+            result_label.config(text = f"Mean: {result}")
+        except Exception as error:
+            msg.showerror("Error",error)
+
+    stats_win = Toplevel()
+    stats_win.geometry("400x180")
+    stats_win.title("Mean")
+    stats_win.resizable(False,False)
+    heading_frame = Frame(stats_win)
+    heading_frame.pack(fill = BOTH,padx = 5,pady = 5)
+    heading_label = Label(heading_frame,text = "dataset: "+dataname,font = ("cascadia code",13))
+    heading_label.pack(fill = BOTH,padx = 5,pady = 5)
+    data_frame = Frame(stats_win)
+    data_frame.pack(fill = BOTH,padx = 5,pady = 5)
+    data_label = Label(data_frame,text = "Data: ",font = ("cascadia code",13))
+    data_label.grid(row = 0,column = 0)
+    col = StringVar()
+    data_box = ttk.Combobox(data_frame,font = ("cascadia code",13),textvariable = col,state = "readonly",width = 28)
+    data_box.grid(row = 0,column = 1)
+    data_box["values"] = tuple(data.columns)
+    result = ""
+    result_label = Label(data_frame,text = f"Mean: {result}",font = ("cascadia code",13))
+    result_label.grid(row = 1,column = 1)
+    btn_frame = Frame(stats_win)
+    btn_frame.pack(fill = BOTH,padx = 5,pady = 5)
+    solve_btn = Button(btn_frame,text = "Solve",font = ("cascadia code",9),command = solve)
+    solve_btn.grid(row = 0,column = 0,padx = 5,pady = 5)
+    exit_btn = Button(btn_frame,text = "Exit",font = ("cascadia code",9),command = stats_win.destroy)
+    exit_btn.grid(row = 0,column = 1)
+    stats_win.mainloop()
+
+def drop_na():
+    global data
+    data_text.config(state = NORMAL)
+    data_text.delete("1.0","end")
+    data = data.dropna()
+    data_text.insert(INSERT,data.to_string())
+    data_text.config(state = DISABLED)
+    
+def sorting():
+    global data,dataname
+    def do_sort():
+        col = data_box.get()
+        order = order_box.get()
+        if order == "True":
+            order = True
+        elif order == "False":
+            order = False
+        else:
+            msg.showerror("Error","You did something wrong!")
+        data_text.config(state = NORMAL)
+        data_text.delete("1.0","end")
+        x = data.sort_values(by = col,ascending = order)
+        data_text.insert(INSERT,x.to_string())
+        data_text.config(state = DISABLED)
+
+    win = Toplevel()
+    win.geometry("450x220")
+    win.title("Sorting")
+    win.resizable(False,False)
+    heading_frame = Frame(win)
+    heading_frame.pack(fill = BOTH,padx = 5,pady = 5)
+    heading_label = Label(heading_frame,text = f"dataset: {dataname}",font = ("cascadia code",13))
+    heading_label.pack(fill = BOTH,padx = 5,pady = 5)
+    main_frame = Frame(win)
+    main_frame.pack(fill = BOTH,padx = 5,pady = 5)
+    main_label = Label(main_frame,text = "sort by: ",font = ("cascadia code",13))
+    main_label.grid(row = 0,column = 0,padx = 5,pady = 5)
+    var = StringVar()
+    data_box = ttk.Combobox(main_frame,font = ("cascadia code",13),textvariable = var,state = "readonly",width = 28)
+    data_box.grid(row = 0,column = 1,padx = 5,pady = 5)
+    data_box["values"] = tuple(data.columns)
+    order_label = Label(main_frame,text = "order: ",font = ("cascadia code",13))
+    order_label.grid(row = 1,column = 0,padx = 5,pady = 5)
+    is_order = StringVar()
+    order_box = ttk.Combobox(main_frame,font = ("cascadia code",13),textvariable = is_order,state = "readonly",width = 28)
+    order_box.grid(row = 1,column = 1,padx = 5,pady = 5)
+    order_box["values"] = (True,False)
+    order_box.current(0)
+    btn_frame = Frame(win)
+    btn_frame.pack(fill = BOTH,padx = 5,pady = 5)
+    sort_btn = Button(btn_frame,text = "sort",font = ("cascadia code",9),command = do_sort)
+    sort_btn.grid(row = 0,column = 0,padx = 5,pady = 5)
+    exit_btn = Button(btn_frame,text = "exit",font = ("cascadia code",9),command = win.destroy)
+    exit_btn.grid(row = 0,column = 1,padx = 5,pady = 5)
+    win.mainloop()
 
 def plot():
     global data,dataname
@@ -115,6 +205,7 @@ def plot():
     x_axis = StringVar()
     x_axis_box = ttk.Combobox(main_frame,font = ("cascadia code",13),textvariable = x_axis,state = "readonly",width = 28)
     x_axis_box.grid(row = 0,column = 1,padx = 5,pady = 5)
+    data["Index"] = data.index
     x_axis_box["values"] = tuple(data.columns)
     y_axis_label = Label(main_frame,text = "y-axis: ",font = ("cascadia code",13))
     y_axis_label.grid(row = 1,column = 0,padx = 5,pady = 5)
@@ -233,6 +324,7 @@ def scatter():
     x_axis = StringVar()
     x_axis_box = ttk.Combobox(main_frame,font = ("cascadia code",13),textvariable = x_axis,state = "readonly",width = 28)
     x_axis_box.grid(row = 0,column = 1,padx = 5,pady = 5)
+    data["Index"] = data.index
     x_axis_box["values"] = tuple(data.columns)
     y_axis_label = Label(main_frame,text = "y-axis: ",font = ("cascadia code",13))
     y_axis_label.grid(row = 1,column = 0,padx = 5,pady = 5)
@@ -315,7 +407,7 @@ def clear():
     data_text.delete("1.0","end")
     data_text.config(state = "disabled")
     dataname = ""
-    data_heading_label.config(text = "data: "+dataname)
+    data_heading_label.config(text = f"dataset: {dataname}")
 
 def go():
     def load():
@@ -327,7 +419,7 @@ def go():
         else:
             data = LoadData.load_data(input_data)
             dataname = input_data
-            data_heading_label.config(text = "data: "+dataname)
+            data_heading_label.config(text = f"dataset: {dataname}")
             data_text.config(state = "normal")
             data_text.insert(INSERT,data.to_string())
             data_text.config(state = "disabled")
@@ -342,7 +434,7 @@ def go():
             try:
                 data = web.get_data_yahoo(input_ticker,start = dt.datetime(2010,1,1),end = dt.datetime.now())
                 dataname = input_ticker.upper()
-                data_heading_label.config(text = "data: "+dataname)
+                data_heading_label.config(text = f"dataset: {dataname}")
                 data_text.config(state = "normal")
                 data_text.insert(INSERT,data.to_string())
                 data_text.config(state = "disabled")
@@ -359,7 +451,7 @@ def go():
 
     elif src == "Chemaphy":
         load_win = Toplevel()
-        load_win.geometry("600x280")
+        load_win.geometry("400x110")
         load_win.title("Load Data")
         load_win.resizable(False,False)
         frame = Frame(load_win)
@@ -372,8 +464,10 @@ def go():
         data_box["values"] = LoadData.data_name()
         btn_frame = Frame(load_win)
         btn_frame.pack(fill = BOTH,padx = 5,pady = 5)
-        btn = Button(btn_frame,text = "Load",font = ("cascadia code",13),command = load)
-        btn.pack(padx = 5,pady = 5)
+        load_btn = Button(btn_frame,text = "Load",font = ("cascadia code",9),command = load)
+        load_btn.grid(row = 0,column = 0,padx = 5,pady = 5)
+        cancel_btn = Button(btn_frame,text = "Cancel",font = ("cascadia code",9),command = load_win.destroy)
+        cancel_btn.grid(row = 0,column = 1,padx = 5,pady = 5)
         load_win.mainloop()
 
     elif src == "Ticker":
@@ -390,8 +484,10 @@ def go():
         ticker_entry.grid(row = 0,column = 1,padx = 5,pady = 5)
         btn_frame = Frame(load_win)
         btn_frame.pack(fill = BOTH,padx = 5,pady = 5)
-        btn = Button(btn_frame,text = "Load",font = ("cascadia code",13),command = ticker)
-        btn.pack(padx = 5,pady = 5)
+        load_btn = Button(btn_frame,text = "Load",font = ("cascadia code",9),command = ticker)
+        load_btn.grid(row = 0,column = 0,padx = 5,pady = 5)
+        cancel_btn = Button(btn_frame,text = "Cancel",font = ("cascadia code",9),command = load_win.destroy)
+        cancel_btn.grid(row = 0,column = 1,padx = 5,pady = 5)
         load_win.mainloop()
 
     elif src == "System":
@@ -429,12 +525,18 @@ main_app.resizable(False,False)
 main_menu = Menu(main_app)
 main_app.config(menu = main_menu)
 graphs_menu = Menu(main_menu,tearoff = 0)
-main_menu.add_command(label = "Statistics",command = statistics)
+stats_menu = Menu(main_menu,tearoff = 0)
+tools_menu = Menu(main_menu,tearoff = 0)
+main_menu.add_cascade(label = "Statistics",menu = stats_menu)
 main_menu.add_cascade(label = "Graphs",menu = graphs_menu)
-graphs_menu.add_command(label = "Plot",command = plot)
-graphs_menu.add_command(label = "Scatter",command = scatter)
-main_menu.add_command(label = "About",command = about_me)
-main_menu.add_command(label = "HomePage",command = home)
+main_menu.add_cascade(label = "Tools",menu = tools_menu)
+stats_menu.add_command(label = "Mean",command = mean)
+graphs_menu.add_command(label = "plot",command = plot)
+graphs_menu.add_command(label = "scatter",command = scatter)
+tools_menu.add_command(label = "dropna",command = drop_na)
+tools_menu.add_command(label = "sort",command = sorting)
+main_menu.add_command(label = "about",command = about_me)
+main_menu.add_command(label = "homepage",command = home)
 
 head_frame = Frame(main_app)
 head_frame.pack(fill = BOTH,padx = 5)
@@ -450,14 +552,14 @@ source["values"] = (
     "Ticker"
 )
 source.current(0)
-go_btn = Button(head_frame,text = "Go",font = ("cascadia code",13),command = go)
+go_btn = Button(head_frame,text = "Go",font = ("cascadia code",9),command = go)
 go_btn.grid(row = 0,column = 2,padx = 5,ipadx = 5)
-clear_data_btn = Button(head_frame,text = "Clear",font = ("cascadia code",13),command = clear)
+clear_data_btn = Button(head_frame,text = "Clear",font = ("cascadia code",9),command = clear)
 clear_data_btn.grid(row = 0,column = 3,padx = 5, ipadx = 5)
-exit_data_btn = Button(head_frame,text = "Exit",font = ("cascadia code",13),command = exit_)
+exit_data_btn = Button(head_frame,text = "Exit",font = ("cascadia code",9),command = exit_)
 exit_data_btn.grid(row = 0,column = 4,padx = 5,pady = 5)
 dataname = ""
-data_heading_label = Label(head_frame,text = "data: "+dataname,font = ("cascadia code",16))
+data_heading_label = Label(head_frame,text = f"dataset: {dataname}",font = ("cascadia code",16))
 data_heading_label.grid(row = 0,column = 5,padx = 20)
 
 data_content_frame = Frame(main_app)
